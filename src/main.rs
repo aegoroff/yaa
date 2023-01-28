@@ -42,8 +42,7 @@ fn main() -> std::io::Result<()> {
         acc
     });
 
-    let mut total_size = 0u64;
-    let mut unpacked_size = 0u64;
+    let mut unpacked_progress = 0u64;
 
     let mut progress = Progresser::new(compressed_size);
     progress.progress(0);
@@ -64,10 +63,9 @@ fn main() -> std::io::Result<()> {
             let mut output = File::create(tar.as_path()).ok()?;
             match std::io::copy(&mut bz2, &mut output) {
                 Ok(bytes) => {
-                    total_size += bytes;
-                    unpacked_size += arj.size;
-                    progress.progress(unpacked_size);
-                    Some(tar)
+                    unpacked_progress += arj.size;
+                    progress.progress(unpacked_progress);
+                    Some((tar, bytes))
                 }
                 Err(e) => {
                     println!("Decompress error: {e}");
@@ -75,7 +73,7 @@ fn main() -> std::io::Result<()> {
                 }
             }
         })
-        .filter_map(|f| {
+        .filter_map(|(f, size)| {
             let path = f.to_string_lossy().to_string();
 
             let result = match File::open(f) {
@@ -106,6 +104,7 @@ fn main() -> std::io::Result<()> {
                     Some(Statistic {
                         path: path.clone(),
                         count: count as u64,
+                        size,
                     })
                 }
                 Err(e) => {
@@ -121,6 +120,11 @@ fn main() -> std::io::Result<()> {
 
     let total_files = stat.iter().fold(0, |mut acc, item| {
         acc += item.count;
+        acc
+    });
+
+    let total_size = stat.iter().fold(0, |mut acc, item| {
+        acc += item.size;
         acc
     });
 
