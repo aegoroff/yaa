@@ -1,0 +1,14 @@
+[package]
+name = "arstat"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tar = "0.4.38"
+bzip2 = "0.4.4"
+num-format = "0.4"
+indicatif = "0.17.3"
+itertools = "0.10"
+prettytable-rs = "0.10.0"
