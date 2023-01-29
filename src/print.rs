@@ -1,6 +1,6 @@
 use indicatif::HumanBytes;
 use num_format::{Locale, ToFormattedString};
-use prettytable::{format, row, Table};
+use prettytable::{format, row, Row, Table};
 
 use crate::FileStat;
 
@@ -29,9 +29,12 @@ impl Resulter {
             .padding(0, 0)
             .build();
         table.set_format(format);
-        table.set_titles(row![bF=> "", "Files", "Size"]);
 
         Self { table }
+    }
+
+    pub fn titles(&mut self, titles: Row) {
+        self.table.set_titles(titles)
     }
 
     pub fn append(&mut self, res: Statistic) {
@@ -42,6 +45,11 @@ impl Resulter {
         let files = count.to_formatted_string(&Locale::ru);
         let size = HumanBytes(size).to_string();
         self.table.add_row(row![bF->name, files, size]);
+    }
+    
+    pub fn append_count_row(&mut self, name: &str, num: usize, count: u64) {
+        let ext_count = count.to_formatted_string(&Locale::ru);
+        self.table.add_row(row![num, bF->name, ext_count]);
     }
 
     pub fn append_empty_row(&mut self) {

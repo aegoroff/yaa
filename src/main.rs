@@ -2,6 +2,7 @@
 extern crate clap;
 
 use clap::{command, Command};
+use prettytable::row;
 
 use std::{fs::File, path::PathBuf};
 
@@ -35,6 +36,7 @@ fn main() -> std::io::Result<()> {
     let app = build_cli();
     let matches = app.get_matches();
 
+    let max_ext_len = *matches.get_one::<usize>("extlen").unwrap_or(&10);
     let root = matches.get_one::<String>(PATH).unwrap();
     let dir = std::fs::read_dir(root)?;
 
@@ -66,8 +68,7 @@ fn main() -> std::io::Result<()> {
     progress.progress(0);
     let stat: Vec<Statistic> = archives
         .iter()
-        .sorted_by_key(|x| x.size)
-        .rev()
+        .sorted_by(|a, b| Ord::cmp(&b.size, &a.size))
         .filter_map(|arj| {
             let archive = File::open(arj.path.as_path()).ok()?;
             let mut bz2 = MultiBzDecoder::new(archive);
@@ -170,9 +171,17 @@ fn main() -> std::io::Result<()> {
         acc
     });
 
+    let extensions = stat
+        .iter()
+        .map(|s| s.files.iter())
+        .flatten()
+        .into_grouping_map_by(|s| s.extension.clone())
+        .fold(0, |acc: u64, _key, _val| acc + 1);
+
     progress.finish("Completed");
 
     let mut resulter = Resulter::new();
+    resulter.titles(row![bF=> "Archive", "Files", "Size"]);
     stat.into_iter()
         .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
@@ -181,6 +190,20 @@ fn main() -> std::io::Result<()> {
     resulter.append_empty_row();
     resulter.append_row("Total", total_size, total_files as u64);
     resulter.print();
+
+    let mut resulter = Resulter::new();
+    resulter.titles(row![bF=> "#", "Extension", "Count"]);
+
+    extensions
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
+        .filter(|(e, _c)| e.len() <= max_ext_len)
+        .enumerate()
+        .for_each(|(num, (ext, count))| {
+            resulter.append_count_row(ext, num + 1, *count);
+        });
+    resulter.print();
+
     Ok(())
 }
 
@@ -195,5 +218,12 @@ fn build_cli() -> Command {
                 .help("Sets Yandex archives path")
                 .required(true)
                 .index(1),
+        )
+        .arg(
+            arg!(-e --extlen <NUMBER>)
+                .required(false)
+                .value_parser(value_parser!(usize))
+                .default_value("10")
+                .help("The max length of file extension to output"),
         )
 }
