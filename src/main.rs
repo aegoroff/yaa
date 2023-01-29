@@ -36,11 +36,8 @@ fn main() -> std::io::Result<()> {
     let app = build_cli();
     let matches = app.get_matches();
 
-    let max_ext_len = *matches.get_one::<usize>("extlen").unwrap_or(&10);
-    let default_ext = "rs".to_string();
-    let ext_to_find = matches
-        .get_one::<String>("extsearch")
-        .unwrap_or(&default_ext);
+    let max_ext_len = *matches.get_one::<usize>("extlen").unwrap();
+    let ext_to_find = matches.get_one::<String>("extsearch").unwrap();
     let root = matches.get_one::<String>(PATH).unwrap();
     let dir = std::fs::read_dir(root)?;
 
