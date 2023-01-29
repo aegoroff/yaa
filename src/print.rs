@@ -1,8 +1,8 @@
-use std::path::PathBuf;
-
 use indicatif::HumanBytes;
 use num_format::{Locale, ToFormattedString};
 use prettytable::{format, row, Table};
+
+use crate::FileStat;
 
 pub struct Resulter {
     table: Table,
@@ -10,7 +10,7 @@ pub struct Resulter {
 
 pub struct Statistic {
     pub title: String,
-    pub files: Vec<PathBuf>,
+    pub files: Vec<FileStat>,
     pub size: u64,
 }
 

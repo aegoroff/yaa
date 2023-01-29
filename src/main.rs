@@ -24,6 +24,11 @@ struct FileInfo {
     size: u64,
 }
 
+pub struct FileStat {
+    pub extension: String,
+    pub size: u64,
+}
+
 const PATH: &str = "PATH";
 
 fn main() -> std::io::Result<()> {
@@ -75,17 +80,16 @@ fn main() -> std::io::Result<()> {
             progress.message(msg);
 
             if tar.exists() {
-                let meta = std::fs::metadata(tar.as_path()).unwrap();
                 unpacked_progress += arj.size;
                 progress.progress(unpacked_progress);
-                Some((tar, meta.len()))
+                Some(tar)
             } else {
                 let mut output = File::create(tar.as_path()).ok()?;
                 match std::io::copy(&mut bz2, &mut output) {
-                    Ok(bytes) => {
+                    Ok(_bytes) => {
                         unpacked_progress += arj.size;
                         progress.progress(unpacked_progress);
-                        Some((tar, bytes))
+                        Some(tar)
                     }
                     Err(e) => {
                         println!("Decompress error: {e}");
@@ -94,7 +98,7 @@ fn main() -> std::io::Result<()> {
                 }
             }
         })
-        .filter_map(|(f, size)| {
+        .filter_map(|f| {
             let file_name = f.file_name()?.to_string_lossy().to_string();
 
             let result = match File::open(f) {
@@ -109,11 +113,24 @@ fn main() -> std::io::Result<()> {
                                     None
                                 }
                             })
-                            .filter_map(|e| match e.path() {
-                                Ok(p) => Some(p.to_path_buf()),
-                                Err(e) => {
-                                    println!("  Error: {e}");
-                                    None
+                            .filter_map(|e| {
+                                let file_size = e.header().size().unwrap_or_default();
+                                match e.path() {
+                                    Ok(p) => {
+                                        let extension = p
+                                            .extension()
+                                            .unwrap_or_default()
+                                            .to_string_lossy()
+                                            .to_string();
+                                        Some(FileStat {
+                                            extension,
+                                            size: file_size,
+                                        })
+                                    }
+                                    Err(e) => {
+                                        println!("  Error: {e}");
+                                        None
+                                    }
                                 }
                             })
                             .collect_vec(),
@@ -122,10 +139,16 @@ fn main() -> std::io::Result<()> {
                             vec![]
                         }
                     };
+
+                    let total_size = files.iter().fold(0, |mut acc, item| {
+                        acc += item.size;
+                        acc
+                    });
+
                     Some(Statistic {
                         title: file_name,
                         files,
-                        size,
+                        size: total_size,
                     })
                 }
                 Err(e) => {
