@@ -3,7 +3,6 @@ use std::{fs::File, path::PathBuf};
 use bzip2::read::MultiBzDecoder;
 use indicatif::HumanBytes;
 use itertools::Itertools;
-use num_format::{Locale, ToFormattedString};
 use progress::Progresser;
 use tar::Archive;
 
@@ -103,7 +102,7 @@ fn main() -> std::io::Result<()> {
                     };
                     Some(Statistic {
                         path: path.clone(),
-                        count: files.len() as u64,
+                        files,
                         size,
                     })
                 }
@@ -119,7 +118,7 @@ fn main() -> std::io::Result<()> {
         .collect();
 
     let total_files = stat.iter().fold(0, |mut acc, item| {
-        acc += item.count;
+        acc += item.files.len();
         acc
     });
 
@@ -136,11 +135,8 @@ fn main() -> std::io::Result<()> {
         .for_each(|item| {
             resulter.append(item);
         });
+    resulter.append_empty_row();
+    resulter.append_row("Total", total_size, total_files as u64);
     resulter.print();
-
-    let size = format!("Total size: {}", HumanBytes(total_size));
-    println!("{size}");
-    let files = total_files.to_formatted_string(&Locale::ru);
-    println!("Total files: {files}");
     Ok(())
 }

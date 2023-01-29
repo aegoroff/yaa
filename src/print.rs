@@ -1,5 +1,7 @@
+use std::path::PathBuf;
+
 use indicatif::HumanBytes;
-use num_format::{ToFormattedString, Locale};
+use num_format::{Locale, ToFormattedString};
 use prettytable::{format, row, Table};
 
 pub struct Resulter {
@@ -8,7 +10,7 @@ pub struct Resulter {
 
 pub struct Statistic {
     pub path: String,
-    pub count: u64,
+    pub files: Vec<PathBuf>,
     pub size: u64,
 }
 
@@ -33,10 +35,17 @@ impl Resulter {
     }
 
     pub fn append(&mut self, res: Statistic) {
-        let files = res.count.to_formatted_string(&Locale::ru);
-        let size = HumanBytes(res.size).to_string();
-        let name = res.path.as_str();
+        self.append_row(&res.path, res.size, res.files.len() as u64);
+    }
+
+    pub fn append_row(&mut self, name: &str, size: u64, count: u64) {
+        let files = count.to_formatted_string(&Locale::ru);
+        let size = HumanBytes(size).to_string();
         self.table.add_row(row![bF->name, files, size]);
+    }
+
+    pub fn append_empty_row(&mut self) {
+        self.table.add_empty_row();
     }
 
     pub fn print(&self) {
