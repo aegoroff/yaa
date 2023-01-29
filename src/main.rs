@@ -79,7 +79,7 @@ fn main() -> std::io::Result<()> {
             let result = match File::open(f) {
                 Ok(tar) => {
                     let mut a = Archive::new(tar);
-                    let count = match a.entries() {
+                    let files = match a.entries() {
                         Ok(files) => files
                             .filter_map(|e| match e {
                                 Ok(entry) => Some(entry),
@@ -95,15 +95,15 @@ fn main() -> std::io::Result<()> {
                                     None
                                 }
                             })
-                            .count(),
+                            .collect_vec(),
                         Err(e) => {
                             println!("Error: {e}");
-                            0
+                            vec![]
                         }
                     };
                     Some(Statistic {
                         path: path.clone(),
-                        count: count as u64,
+                        count: files.len() as u64,
                         size,
                     })
                 }
