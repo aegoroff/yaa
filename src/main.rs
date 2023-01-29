@@ -37,6 +37,10 @@ fn main() -> std::io::Result<()> {
     let matches = app.get_matches();
 
     let max_ext_len = *matches.get_one::<usize>("extlen").unwrap_or(&10);
+    let default_ext = "rs".to_string();
+    let ext_to_find = matches
+        .get_one::<String>("extsearch")
+        .unwrap_or(&default_ext);
     let root = matches.get_one::<String>(PATH).unwrap();
     let dir = std::fs::read_dir(root)?;
 
@@ -178,9 +182,9 @@ fn main() -> std::io::Result<()> {
         .into_grouping_map_by(|s| s.extension.clone())
         .fold(0, |acc: u64, _key, _val| acc + 1);
 
-    let tars_with_rust = stat
+    let tars_with_ext = stat
         .iter()
-        .filter(|s| s.files.iter().any(|x| x.extension == "rs"))
+        .filter(|s| s.files.iter().any(|x| x.extension == ext_to_find.as_str()))
         .collect_vec();
 
     progress.finish("Completed");
@@ -197,14 +201,20 @@ fn main() -> std::io::Result<()> {
     resulter.print();
 
     let mut resulter = Resulter::new();
-    resulter.titles(row![bF=> "#", "Archive with rust code", "Count"]);
+    let title = format!("Archive with '{ext_to_find}' extension");
+    resulter.titles(row![bF=> "#", title, "Count"]);
 
-    tars_with_rust
+    tars_with_ext
         .iter()
         .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
         .enumerate()
         .for_each(|(num, stat)| {
-            resulter.append_count_row(&stat.title, num + 1, stat.files.len() as u64);
+            let count = stat
+                .files
+                .iter()
+                .filter(|f| f.extension == ext_to_find.as_str())
+                .count();
+            resulter.append_count_row(&stat.title, num + 1, count as u64);
         });
     resulter.print();
 
@@ -242,5 +252,11 @@ fn build_cli() -> Command {
                 .value_parser(value_parser!(usize))
                 .default_value("10")
                 .help("The max length of file extension to output"),
+        )
+        .arg(
+            arg!(-s --extsearch <STRING>)
+                .required(false)
+                .default_value("rs")
+                .help("An extension to search in archives"),
         )
 }
