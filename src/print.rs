@@ -9,7 +9,7 @@ pub struct Resulter {
 }
 
 pub struct Statistic {
-    pub path: String,
+    pub title: String,
     pub files: Vec<PathBuf>,
     pub size: u64,
 }
@@ -35,7 +35,7 @@ impl Resulter {
     }
 
     pub fn append(&mut self, res: Statistic) {
-        self.append_row(&res.path, res.size, res.files.len() as u64);
+        self.append_row(&res.title, res.size, res.files.len() as u64);
     }
 
     pub fn append_row(&mut self, name: &str, size: u64, count: u64) {

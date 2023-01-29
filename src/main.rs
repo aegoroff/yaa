@@ -84,6 +84,7 @@ fn main() -> std::io::Result<()> {
         })
         .filter_map(|(f, size)| {
             let path = f.to_string_lossy().to_string();
+            let file_name = f.file_name()?.to_string_lossy().to_string();
 
             let result = match File::open(f) {
                 Ok(tar) => {
@@ -111,7 +112,7 @@ fn main() -> std::io::Result<()> {
                         }
                     };
                     Some(Statistic {
-                        path: path.clone(),
+                        title: file_name,
                         files,
                         size,
                     })
@@ -141,7 +142,7 @@ fn main() -> std::io::Result<()> {
 
     let mut resulter = Resulter::new();
     stat.into_iter()
-        .sorted_by(|a, b| Ord::cmp(&a.path, &b.path))
+        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
             resulter.append(item);
         });
