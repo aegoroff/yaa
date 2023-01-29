@@ -46,9 +46,14 @@ impl Resulter {
         let size = HumanBytes(size).to_string();
         self.table.add_row(row![bF->name, files, size]);
     }
-    
+
     pub fn append_count_row(&mut self, name: &str, num: usize, count: u64) {
         let ext_count = count.to_formatted_string(&Locale::ru);
+        let num = if num > 0 {
+            num.to_string()
+        } else {
+            String::default()
+        };
         self.table.add_row(row![num, bF->name, ext_count]);
     }
 

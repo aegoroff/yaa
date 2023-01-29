@@ -67,13 +67,14 @@ fn default_action(root: &str) -> std::io::Result<()> {
         });
     resulter.append_empty_row();
     resulter.append_row("Total", total_size, total_files as u64);
+    println!();
     resulter.print();
     Ok(())
 }
 
 fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
-    let max_ext_len = *cmd.get_one::<usize>("extlen").unwrap();
+    let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
 
     let extensions = stat
         .iter()
@@ -93,6 +94,7 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         .for_each(|(num, (ext, count))| {
             resulter.append_count_row(ext, num + 1, *count);
         });
+    println!();
     resulter.print();
 
     Ok(())
@@ -112,6 +114,7 @@ fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
     let title = format!("Archive with '{ext_to_find}' extension");
     resulter.titles(row![bF=> "#", title, "Count"]);
 
+    let mut total_count = 0u64;
     tars_with_ext
         .iter()
         .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
@@ -121,9 +124,13 @@ fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
                 .files
                 .iter()
                 .filter(|f| f.extension == ext_to_find.as_str())
-                .count();
-            resulter.append_count_row(&stat.title, num + 1, count as u64);
+                .count() as u64;
+            total_count += count;
+            resulter.append_count_row(&stat.title, num + 1, count);
         });
+    resulter.append_empty_row();
+    resulter.append_count_row("Total", 0, total_count);
+    println!();
     resulter.print();
 
     Ok(())
@@ -251,7 +258,7 @@ fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
             result
         })
         .collect();
-    progress.finish("Completed");
+    progress.finish("  Completed");
     Ok(stat)
 }
 
@@ -272,7 +279,7 @@ fn build_cli() -> Command {
                 .aliases(["extensions"])
                 .about("Show extensions info")
                 .arg(
-                    arg!(-e --extlen <NUMBER>)
+                    arg!(-l --length <NUMBER>)
                         .required(false)
                         .value_parser(value_parser!(usize))
                         .default_value("10")
