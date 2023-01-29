@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{command, Command};
+use clap::{command, ArgMatches, Command};
 use prettytable::row;
 
 use std::{fs::File, path::PathBuf};
@@ -36,11 +36,101 @@ fn main() -> std::io::Result<()> {
     let app = build_cli();
     let matches = app.get_matches();
 
-    let max_ext_len = *matches.get_one::<usize>("extlen").unwrap();
-    let ext_to_find = matches.get_one::<String>("extsearch").unwrap();
     let root = matches.get_one::<String>(PATH).unwrap();
-    let dir = std::fs::read_dir(root)?;
 
+    match matches.subcommand() {
+        Some(("e", cmd)) => show_extensions(root, cmd),
+        Some(("s", cmd)) => search_extension(root, cmd),
+        _ => default_action(root),
+    }
+}
+
+fn default_action(root: &str) -> std::io::Result<()> {
+    let stat = collect_statistic(root)?;
+
+    let total_files = stat.iter().fold(0, |mut acc, item| {
+        acc += item.files.len();
+        acc
+    });
+
+    let total_size = stat.iter().fold(0, |mut acc, item| {
+        acc += item.size;
+        acc
+    });
+
+    let mut resulter = Resulter::new();
+    resulter.titles(row![bF=> "Archive", "Files", "Size"]);
+    stat.iter()
+        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
+        .for_each(|item| {
+            resulter.append(item);
+        });
+    resulter.append_empty_row();
+    resulter.append_row("Total", total_size, total_files as u64);
+    resulter.print();
+    Ok(())
+}
+
+fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
+    let stat = collect_statistic(root)?;
+    let max_ext_len = *cmd.get_one::<usize>("extlen").unwrap();
+
+    let extensions = stat
+        .iter()
+        .map(|s| s.files.iter())
+        .flatten()
+        .into_grouping_map_by(|s| s.extension.clone())
+        .fold(0, |acc: u64, _key, _val| acc + 1);
+
+    let mut resulter = Resulter::new();
+    resulter.titles(row![bF=> "#", "Extension", "Count"]);
+
+    extensions
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
+        .filter(|(e, _c)| e.len() <= max_ext_len)
+        .enumerate()
+        .for_each(|(num, (ext, count))| {
+            resulter.append_count_row(ext, num + 1, *count);
+        });
+    resulter.print();
+
+    Ok(())
+}
+
+fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
+    let stat = collect_statistic(root)?;
+
+    let ext_to_find = cmd.get_one::<String>("STRING").unwrap();
+
+    let tars_with_ext = stat
+        .iter()
+        .filter(|s| s.files.iter().any(|x| x.extension == ext_to_find.as_str()))
+        .collect_vec();
+
+    let mut resulter = Resulter::new();
+    let title = format!("Archive with '{ext_to_find}' extension");
+    resulter.titles(row![bF=> "#", title, "Count"]);
+
+    tars_with_ext
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
+        .enumerate()
+        .for_each(|(num, stat)| {
+            let count = stat
+                .files
+                .iter()
+                .filter(|f| f.extension == ext_to_find.as_str())
+                .count();
+            resulter.append_count_row(&stat.title, num + 1, count as u64);
+        });
+    resulter.print();
+
+    Ok(())
+}
+
+fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
+    let dir = std::fs::read_dir(root)?;
     let archives = dir
         .filter_map(|entry| entry.ok())
         .filter(|d| d.file_type().is_ok() && d.file_type().unwrap().is_file())
@@ -161,74 +251,8 @@ fn main() -> std::io::Result<()> {
             result
         })
         .collect();
-
-    let total_files = stat.iter().fold(0, |mut acc, item| {
-        acc += item.files.len();
-        acc
-    });
-
-    let total_size = stat.iter().fold(0, |mut acc, item| {
-        acc += item.size;
-        acc
-    });
-
-    let extensions = stat
-        .iter()
-        .map(|s| s.files.iter())
-        .flatten()
-        .into_grouping_map_by(|s| s.extension.clone())
-        .fold(0, |acc: u64, _key, _val| acc + 1);
-
-    let tars_with_ext = stat
-        .iter()
-        .filter(|s| s.files.iter().any(|x| x.extension == ext_to_find.as_str()))
-        .collect_vec();
-
     progress.finish("Completed");
-
-    let mut resulter = Resulter::new();
-    resulter.titles(row![bF=> "Archive", "Files", "Size"]);
-    stat.iter()
-        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
-        .for_each(|item| {
-            resulter.append(item);
-        });
-    resulter.append_empty_row();
-    resulter.append_row("Total", total_size, total_files as u64);
-    resulter.print();
-
-    let mut resulter = Resulter::new();
-    let title = format!("Archive with '{ext_to_find}' extension");
-    resulter.titles(row![bF=> "#", title, "Count"]);
-
-    tars_with_ext
-        .iter()
-        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
-        .enumerate()
-        .for_each(|(num, stat)| {
-            let count = stat
-                .files
-                .iter()
-                .filter(|f| f.extension == ext_to_find.as_str())
-                .count();
-            resulter.append_count_row(&stat.title, num + 1, count as u64);
-        });
-    resulter.print();
-
-    let mut resulter = Resulter::new();
-    resulter.titles(row![bF=> "#", "Extension", "Count"]);
-
-    extensions
-        .iter()
-        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
-        .filter(|(e, _c)| e.len() <= max_ext_len)
-        .enumerate()
-        .for_each(|(num, (ext, count))| {
-            resulter.append_count_row(ext, num + 1, *count);
-        });
-    resulter.print();
-
-    Ok(())
+    Ok(stat)
 }
 
 fn build_cli() -> Command {
@@ -243,17 +267,27 @@ fn build_cli() -> Command {
                 .required(true)
                 .index(1),
         )
-        .arg(
-            arg!(-e --extlen <NUMBER>)
-                .required(false)
-                .value_parser(value_parser!(usize))
-                .default_value("10")
-                .help("The max length of file extension to output"),
+        .subcommand(
+            Command::new("e")
+                .aliases(["extensions"])
+                .about("Show extensions info")
+                .arg(
+                    arg!(-e --extlen <NUMBER>)
+                        .required(false)
+                        .value_parser(value_parser!(usize))
+                        .default_value("10")
+                        .help("The max length of file extension to output"),
+                ),
         )
-        .arg(
-            arg!(-s --extsearch <STRING>)
-                .required(false)
-                .default_value("rs")
-                .help("An extension to search in archives"),
+        .subcommand(
+            Command::new("s")
+                .aliases(["search"])
+                .about("Search archives with extensions specified")
+                .arg(
+                    arg!([STRING])
+                        .help("An extension to search in archives")
+                        .required(true)
+                        .index(1),
+                ),
         )
 }
