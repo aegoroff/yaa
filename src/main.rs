@@ -1,3 +1,8 @@
+#[macro_use]
+extern crate clap;
+
+use clap::{command, Command};
+
 use std::{fs::File, path::PathBuf};
 
 use bzip2::read::MultiBzDecoder;
@@ -19,8 +24,13 @@ struct FileInfo {
     size: u64,
 }
 
+const PATH: &str = "PATH";
+
 fn main() -> std::io::Result<()> {
-    let root = "/home/egr/Downloads/ya";
+    let app = build_cli();
+    let matches = app.get_matches();
+
+    let root = matches.get_one::<String>(PATH).unwrap();
     let dir = std::fs::read_dir(root)?;
 
     let archives = dir
@@ -139,4 +149,18 @@ fn main() -> std::io::Result<()> {
     resulter.append_row("Total", total_size, total_files as u64);
     resulter.print();
     Ok(())
+}
+
+fn build_cli() -> Command {
+    command!(crate_name!())
+        .arg_required_else_help(true)
+        .version(crate_version!())
+        .author(crate_authors!("\n"))
+        .about(crate_description!())
+        .arg(
+            arg!([PATH])
+                .help("Sets Yandex archives path")
+                .required(true)
+                .index(1),
+        )
 }
