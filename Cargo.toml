@@ -1,6 +1,10 @@
 [package]
-name = "arstat"
+name = "yaa"
+description = "Yandes archive analyzer tool"
+authors = ["egoroff <egoroff@gmail.com>"]
 version = "0.1.0"
+keywords = ["yandex", "tool", "sources", "analyze"]
+license = "MIT"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
