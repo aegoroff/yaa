@@ -39,10 +39,14 @@ fn main() -> std::io::Result<()> {
         .filter_map(|file| {
             let full_path = file.path();
             let meta = std::fs::metadata(full_path).ok()?;
-            Some(FileInfo {
-                path: file.path(),
-                size: meta.len(),
-            })
+            if file.path().as_path().extension().unwrap() == "bz2" {
+                Some(FileInfo {
+                    path: file.path(),
+                    size: meta.len(),
+                })
+            } else {
+                None
+            }
         })
         .collect::<Vec<FileInfo>>();
 
@@ -69,21 +73,28 @@ fn main() -> std::io::Result<()> {
             let bytes = HumanBytes(arj.size);
             let msg = format!("  Current: {} ({bytes})", arj.path.to_string_lossy());
             progress.message(msg);
-            let mut output = File::create(tar.as_path()).ok()?;
-            match std::io::copy(&mut bz2, &mut output) {
-                Ok(bytes) => {
-                    unpacked_progress += arj.size;
-                    progress.progress(unpacked_progress);
-                    Some((tar, bytes))
-                }
-                Err(e) => {
-                    println!("Decompress error: {e}");
-                    None
+
+            if tar.exists() {
+                let meta = std::fs::metadata(tar.as_path()).unwrap();
+                unpacked_progress += arj.size;
+                progress.progress(unpacked_progress);
+                Some((tar, meta.len()))
+            } else {
+                let mut output = File::create(tar.as_path()).ok()?;
+                match std::io::copy(&mut bz2, &mut output) {
+                    Ok(bytes) => {
+                        unpacked_progress += arj.size;
+                        progress.progress(unpacked_progress);
+                        Some((tar, bytes))
+                    }
+                    Err(e) => {
+                        println!("Decompress error: {e}");
+                        None
+                    }
                 }
             }
         })
         .filter_map(|(f, size)| {
-            let path = f.to_string_lossy().to_string();
             let file_name = f.file_name()?.to_string_lossy().to_string();
 
             let result = match File::open(f) {
@@ -122,8 +133,6 @@ fn main() -> std::io::Result<()> {
                     None
                 }
             };
-
-            std::fs::remove_file(path).unwrap_or_default();
             result
         })
         .collect();
