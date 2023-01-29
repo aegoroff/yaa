@@ -178,17 +178,34 @@ fn main() -> std::io::Result<()> {
         .into_grouping_map_by(|s| s.extension.clone())
         .fold(0, |acc: u64, _key, _val| acc + 1);
 
+    let tars_with_rust = stat
+        .iter()
+        .filter(|s| s.files.iter().any(|x| x.extension == "rs"))
+        .collect_vec();
+
     progress.finish("Completed");
 
     let mut resulter = Resulter::new();
     resulter.titles(row![bF=> "Archive", "Files", "Size"]);
-    stat.into_iter()
+    stat.iter()
         .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
             resulter.append(item);
         });
     resulter.append_empty_row();
     resulter.append_row("Total", total_size, total_files as u64);
+    resulter.print();
+
+    let mut resulter = Resulter::new();
+    resulter.titles(row![bF=> "#", "Archive with rust code", "Count"]);
+
+    tars_with_rust
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
+        .enumerate()
+        .for_each(|(num, stat)| {
+            resulter.append_count_row(&stat.title, num + 1, stat.files.len() as u64);
+        });
     resulter.print();
 
     let mut resulter = Resulter::new();

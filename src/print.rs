@@ -37,7 +37,7 @@ impl Resulter {
         self.table.set_titles(titles)
     }
 
-    pub fn append(&mut self, res: Statistic) {
+    pub fn append(&mut self, res: &Statistic) {
         self.append_row(&res.title, res.size, res.files.len() as u64);
     }
 
