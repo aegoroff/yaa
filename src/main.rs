@@ -74,6 +74,7 @@ fn default_action(root: &str) -> std::io::Result<()> {
 fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
     let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
+    let show_top_extensions = cmd.get_one::<usize>("top");
 
     let extensions = stat
         .iter()
@@ -89,6 +90,9 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
         .filter(|(e, _c)| e.len() <= max_ext_len)
         .enumerate()
+        .take_while(|(num, (_, _))| {
+            show_top_extensions.is_none() || *show_top_extensions.unwrap() > *num
+        })
         .for_each(|(num, (ext, count))| {
             resulter.append_count_row(ext, num + 1, *count);
         });
@@ -280,6 +284,12 @@ fn build_cli() -> Command {
                         .value_parser(value_parser!(usize))
                         .default_value("10")
                         .help("The max length of file extension to output"),
+                )
+                .arg(
+                    arg!(-t --top <NUMBER>)
+                        .required(false)
+                        .value_parser(value_parser!(usize))
+                        .help("Output only specified number of extensions sorted by count"),
                 ),
         )
         .subcommand(
