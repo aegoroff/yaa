@@ -67,7 +67,6 @@ fn default_action(root: &str) -> std::io::Result<()> {
         });
     resulter.append_empty_row();
     resulter.append_row("Total", total_size, total_files as u64);
-    println!();
     resulter.print();
     Ok(())
 }
@@ -93,7 +92,6 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         .for_each(|(num, (ext, count))| {
             resulter.append_count_row(ext, num + 1, *count);
         });
-    println!();
     resulter.print();
 
     Ok(())
@@ -129,7 +127,6 @@ fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         });
     resulter.append_empty_row();
     resulter.append_count_row("Total", 0, total_count);
-    println!();
     resulter.print();
 
     Ok(())

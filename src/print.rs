@@ -63,6 +63,7 @@ impl Resulter {
 
     pub fn print(&self) {
         println!();
+        println!();
         self.table.printstd();
     }
 }
