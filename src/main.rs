@@ -78,8 +78,7 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
 
     let extensions = stat
         .iter()
-        .map(|s| s.files.iter())
-        .flatten()
+        .flat_map(|s| s.files.iter())
         .into_grouping_map_by(|s| s.extension.clone())
         .fold(0, |acc: u64, _key, _val| acc + 1);
 

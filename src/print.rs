@@ -66,3 +66,9 @@ impl Resulter {
         self.table.printstd();
     }
 }
+
+impl Default for Resulter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
