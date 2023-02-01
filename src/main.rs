@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{command, ArgMatches, Command};
+use clap::{command, ArgMatches, Command, ArgAction};
 use prettytable::row;
 
 use std::{fs::File, path::PathBuf};
@@ -37,15 +37,16 @@ fn main() -> std::io::Result<()> {
     let matches = app.get_matches();
 
     let root = matches.get_one::<String>(PATH).unwrap();
+    let output_as_html = matches.get_flag("html");
 
     match matches.subcommand() {
-        Some(("e", cmd)) => show_extensions(root, cmd),
-        Some(("s", cmd)) => search_extension(root, cmd),
-        _ => default_action(root),
+        Some(("e", cmd)) => show_extensions(root, output_as_html, cmd),
+        Some(("s", cmd)) => search_extension(root, output_as_html, cmd),
+        _ => default_action(root, output_as_html),
     }
 }
 
-fn default_action(root: &str) -> std::io::Result<()> {
+fn default_action(root: &str, output_as_html: bool) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
 
     let total_files = stat.iter().fold(0, |mut acc, item| {
@@ -58,7 +59,7 @@ fn default_action(root: &str) -> std::io::Result<()> {
         acc
     });
 
-    let mut resulter = Resulter::new();
+    let mut resulter = Resulter::new(output_as_html);
     resulter.titles(row![bF=> "Archive", "Files", "Size"]);
     stat.iter()
         .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
@@ -71,7 +72,7 @@ fn default_action(root: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
+fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
     let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
     let show_top_extensions = cmd.get_one::<usize>("top");
@@ -82,7 +83,7 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         .into_grouping_map_by(|s| s.extension.clone())
         .fold(0, |acc: u64, _key, _val| acc + 1);
 
-    let mut resulter = Resulter::new();
+    let mut resulter = Resulter::new(output_as_html);
     resulter.titles(row![bF=> "#", "Extension", "Count"]);
 
     extensions
@@ -101,7 +102,7 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
     Ok(())
 }
 
-fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
+fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
 
     let ext_to_find = cmd.get_one::<String>("STRING").unwrap();
@@ -111,7 +112,7 @@ fn search_extension(root: &str, cmd: &ArgMatches) -> std::io::Result<()> {
         .filter(|s| s.files.iter().any(|x| x.extension == ext_to_find.as_str()))
         .collect_vec();
 
-    let mut resulter = Resulter::new();
+    let mut resulter = Resulter::new(output_as_html);
     let title = format!("Archive with '{ext_to_find}' extension");
     resulter.titles(row![bF=> "#", title, "Count"]);
 
@@ -273,6 +274,12 @@ fn build_cli() -> Command {
                 .help("Sets Yandex archives path")
                 .required(true)
                 .index(1),
+        )
+        .arg(
+            arg!(--html)
+                .required(false)
+                .action(ArgAction::SetTrue)
+                .help("Output in HTML format"),
         )
         .subcommand(
             Command::new("e")

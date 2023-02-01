@@ -6,6 +6,7 @@ use crate::FileStat;
 
 pub struct Resulter {
     table: Table,
+    output_as_html: bool,
 }
 
 pub struct Statistic {
@@ -15,7 +16,7 @@ pub struct Statistic {
 }
 
 impl Resulter {
-    pub fn new() -> Self {
+    pub fn new(output_as_html: bool) -> Self {
         let mut table = Table::new();
 
         let format = format::FormatBuilder::new()
@@ -30,7 +31,10 @@ impl Resulter {
             .build();
         table.set_format(format);
 
-        Self { table }
+        Self {
+            table,
+            output_as_html,
+        }
     }
 
     pub fn titles(&mut self, titles: Row) {
@@ -64,12 +68,11 @@ impl Resulter {
     pub fn print(&self) {
         println!();
         println!();
-        self.table.printstd();
-    }
-}
-
-impl Default for Resulter {
-    fn default() -> Self {
-        Self::new()
+        if self.output_as_html {
+            let mut w = std::io::stdout();
+            self.table.print_html(&mut w).unwrap_or_default();
+        } else {
+            self.table.printstd();
+        }
     }
 }
