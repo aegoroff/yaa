@@ -38,7 +38,7 @@ impl Resulter {
     }
 
     pub fn titles(&mut self, titles: Row) {
-        self.table.set_titles(titles)
+        self.table.set_titles(titles);
     }
 
     pub fn append(&mut self, res: &Statistic) {
