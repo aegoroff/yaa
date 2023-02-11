@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{command, ArgMatches, Command, ArgAction};
+use clap::{command, ArgAction, ArgMatches, Command};
 use prettytable::row;
 
 use std::{fs::File, path::PathBuf};
@@ -138,23 +138,7 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::
 }
 
 fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
-    let dir = std::fs::read_dir(root)?;
-    let archives = dir
-        .filter_map(std::result::Result::ok)
-        .filter(|d| d.file_type().is_ok() && d.file_type().unwrap().is_file())
-        .filter_map(|file| {
-            let full_path = file.path();
-            let meta = std::fs::metadata(full_path).ok()?;
-            if file.path().as_path().extension().unwrap() == "bz2" {
-                Some(FileInfo {
-                    path: file.path(),
-                    size: meta.len(),
-                })
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<FileInfo>>();
+    let archives = collect_files(root, "bz2")?;
 
     let compressed_size = archives.iter().fold(0, |mut acc, x| {
         acc += x.size;
@@ -261,6 +245,27 @@ fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
         .collect();
     progress.finish("  Completed");
     Ok(stat)
+}
+
+fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::Error> {
+    let dir = std::fs::read_dir(root)?;
+    let files = dir
+        .filter_map(std::result::Result::ok)
+        .filter(|d| d.file_type().is_ok() && d.file_type().unwrap().is_file())
+        .filter_map(|file| {
+            let full_path = file.path();
+            let meta = std::fs::metadata(full_path).ok()?;
+            if file.path().as_path().extension().unwrap() == extension {
+                Some(FileInfo {
+                    path: file.path(),
+                    size: meta.len(),
+                })
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<FileInfo>>();
+    Ok(files)
 }
 
 fn build_cli() -> Command {
