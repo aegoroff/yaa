@@ -19,7 +19,7 @@ pub struct Progresser {
 }
 
 impl Progresser {
-    pub fn new(total: u64) -> Self {
+    #[must_use] pub fn new(total: u64) -> Self {
         let bar = ProgressBar::new(total);
         bar.set_style(ProgressStyle::default_bar()
             .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})\n{wide_msg}")

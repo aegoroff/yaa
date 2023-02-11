@@ -140,7 +140,7 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::
 fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
     let dir = std::fs::read_dir(root)?;
     let archives = dir
-        .filter_map(|entry| entry.ok())
+        .filter_map(std::result::Result::ok)
         .filter(|d| d.file_type().is_ok() && d.file_type().unwrap().is_file())
         .filter_map(|file| {
             let full_path = file.path();
