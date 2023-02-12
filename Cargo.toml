@@ -1,6 +1,6 @@
 [package]
 name = "yaa"
-description = "Yandes archive analyzer tool"
+description = "Yandex archives analyzer tool"
 authors = ["egoroff <egoroff@gmail.com>"]
 version = "0.1.0"
 keywords = ["yandex", "tool", "sources", "analyze"]
