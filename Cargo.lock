@@ -659,6 +659,7 @@ dependencies = [
  "clap",
  "indicatif",
  "itertools",
+ "lazy_static",
  "num-format",
  "prettytable-rs",
  "tar",

@@ -16,6 +16,7 @@ num-format = "0.4"
 indicatif = "0.17.3"
 itertools = "0.10"
 prettytable-rs = "0.10.0"
+lazy_static = "1.4.0"
 clap = { version = "4.1.4", features = ["std", "color", "suggestions", "cargo", "derive"] }
 
 [profile.release]
