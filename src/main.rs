@@ -54,6 +54,7 @@ const RUST_CAT: &str = "Rust";
 const RUBY_CAT: &str = "Ruby";
 const LUA_CAT: &str = "Lua";
 const ASSEMBLER_CAT: &str = "Assembler";
+const FONTS_CAT: &str = "Fonts";
 
 const TECHOLOGIES: &[(&str, &str)] = &[
     ("java", JAVA_CAT),
@@ -169,6 +170,18 @@ const TECHOLOGIES: &[(&str, &str)] = &[
     ("xlsx", CONFIG_CAT),
     ("groovy", JAVA_CAT),
     ("ini", CONFIG_CAT),
+    ("sqlite3", DB_CAT),
+    ("mysql", DB_CAT),
+    ("chsql", DB_CAT),
+    ("dbf", DB_CAT),
+    ("il", DOTNET_CAT),
+    ("7z", ARCHIEVE_CAT),
+    ("bz2", ARCHIEVE_CAT),
+    ("m4a", MULTIMEDIA_CAT),
+    ("woff", FONTS_CAT),
+    ("woff2", FONTS_CAT),
+    ("ttf", FONTS_CAT),
+    ("tt2", FONTS_CAT),
 ];
 
 lazy_static::lazy_static! {
