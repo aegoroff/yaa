@@ -16,7 +16,8 @@ pub struct Statistic {
 }
 
 impl Resulter {
-    #[must_use] pub fn new(output_as_html: bool) -> Self {
+    #[must_use]
+    pub fn new(output_as_html: bool) -> Self {
         let mut table = Table::new();
 
         let format = format::FormatBuilder::new()
