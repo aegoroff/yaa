@@ -206,15 +206,9 @@ fn main() -> std::io::Result<()> {
 fn default_action(root: &str, output_as_html: bool) -> std::io::Result<()> {
     let stat = collect_statistic(root)?;
 
-    let total_files = stat.iter().fold(0, |mut acc, item| {
-        acc += item.files.len();
-        acc
-    });
+    let total_files: usize = stat.iter().map(|s| s.files.len()).sum();
 
-    let total_size = stat.iter().fold(0, |mut acc, item| {
-        acc += item.size;
-        acc
-    });
+    let total_size = stat.iter().map(|s| s.size).sum();
 
     let mut resulter = Resulter::new(output_as_html);
     resulter.titles(row![bF=> "Archive", "Files", "Size"]);
@@ -332,10 +326,7 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::
 fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
     let archives = collect_files(root, "bz2")?;
 
-    let compressed_size = archives.iter().fold(0, |mut acc, x| {
-        acc += x.size;
-        acc
-    });
+    let compressed_size = archives.iter().map(|f| f.size).sum();
 
     let mut unpacked_progress = 0u64;
 
@@ -416,10 +407,7 @@ fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
                         }
                     };
 
-                    let total_size = files.iter().fold(0, |mut acc, item| {
-                        acc += item.size;
-                        acc
-                    });
+                    let total_size = files.iter().map(|f| f.size).sum();
 
                     Some(Statistic {
                         title: file_name,
