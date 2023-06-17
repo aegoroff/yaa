@@ -453,7 +453,7 @@ fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::
                 None
             }
         })
-        .collect::<Vec<FileInfo>>();
+        .collect_vec();
     Ok(files)
 }
 
