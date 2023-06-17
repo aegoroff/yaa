@@ -365,66 +365,67 @@ fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
                 }
             }
         })
-        .filter_map(|f| {
-            let file_name = f.file_name()?.to_string_lossy().to_string();
-
-            let result = match File::open(f) {
-                Ok(tar) => {
-                    let mut a = Archive::new(tar);
-                    let files = match a.entries() {
-                        Ok(files) => files
-                            .filter_map(|e| match e {
-                                Ok(entry) => Some(entry),
-                                Err(e) => {
-                                    println!("  Error: {e}");
-                                    None
-                                }
-                            })
-                            .filter_map(|e| {
-                                let file_size = e.header().size().unwrap_or_default();
-                                match e.path() {
-                                    Ok(p) => {
-                                        let extension = p
-                                            .extension()
-                                            .unwrap_or_default()
-                                            .to_string_lossy()
-                                            .to_string();
-                                        Some(FileStat {
-                                            extension,
-                                            size: file_size,
-                                        })
-                                    }
-                                    Err(e) => {
-                                        println!("  Error: {e}");
-                                        None
-                                    }
-                                }
-                            })
-                            .collect_vec(),
-                        Err(e) => {
-                            println!("Error: {e}");
-                            vec![]
-                        }
-                    };
-
-                    let total_size = files.iter().map(|f| f.size).sum();
-
-                    Some(Statistic {
-                        title: file_name,
-                        files,
-                        size: total_size,
-                    })
-                }
-                Err(e) => {
-                    println!("Error: {e}");
-                    None
-                }
-            };
-            result
-        })
+        .filter_map(read_file_statistic)
         .collect();
     progress.finish("  Completed");
     Ok(stat)
+}
+
+fn read_file_statistic(path: PathBuf) -> Option<Statistic> {
+    let file_name = path.file_name()?.to_string_lossy().to_string();
+
+    match File::open(path) {
+        Ok(tar) => {
+            let mut a = Archive::new(tar);
+            let files = match a.entries() {
+                Ok(files) => files
+                    .filter_map(|e| match e {
+                        Ok(entry) => Some(entry),
+                        Err(e) => {
+                            println!("  Error: {e}");
+                            None
+                        }
+                    })
+                    .filter_map(|e| {
+                        let file_size = e.header().size().unwrap_or_default();
+                        match e.path() {
+                            Ok(p) => {
+                                let extension = p
+                                    .extension()
+                                    .unwrap_or_default()
+                                    .to_string_lossy()
+                                    .to_string();
+                                Some(FileStat {
+                                    extension,
+                                    size: file_size,
+                                })
+                            }
+                            Err(e) => {
+                                println!("  Error: {e}");
+                                None
+                            }
+                        }
+                    })
+                    .collect_vec(),
+                Err(e) => {
+                    println!("Error: {e}");
+                    vec![]
+                }
+            };
+
+            let total_size = files.iter().map(|f| f.size).sum();
+
+            Some(Statistic {
+                title: file_name,
+                files,
+                size: total_size,
+            })
+        }
+        Err(e) => {
+            println!("Error: {e}");
+            None
+        }
+    }
 }
 
 fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::Error> {
