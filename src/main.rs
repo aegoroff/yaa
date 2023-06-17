@@ -4,7 +4,7 @@ extern crate clap;
 use clap::{command, ArgAction, ArgMatches, Command};
 use prettytable::row;
 
-use std::{collections::HashMap, fs::File, path::PathBuf};
+use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
 use bzip2::read::MultiBzDecoder;
 use indicatif::HumanBytes;
@@ -378,42 +378,7 @@ fn read_file_statistic(path: PathBuf) -> Option<Statistic> {
 
     match File::open(path) {
         Ok(tar) => {
-            let mut a = Archive::new(tar);
-            let files = match a.entries() {
-                Ok(files) => files
-                    .filter_map(|e| match e {
-                        Ok(entry) => Some(entry),
-                        Err(e) => {
-                            println!("  Error: {e}");
-                            None
-                        }
-                    })
-                    .filter_map(|e| {
-                        let file_size = e.header().size().unwrap_or_default();
-                        match e.path() {
-                            Ok(p) => {
-                                let extension = p
-                                    .extension()
-                                    .unwrap_or_default()
-                                    .to_string_lossy()
-                                    .to_string();
-                                Some(FileStat {
-                                    extension,
-                                    size: file_size,
-                                })
-                            }
-                            Err(e) => {
-                                println!("  Error: {e}");
-                                None
-                            }
-                        }
-                    })
-                    .collect_vec(),
-                Err(e) => {
-                    println!("Error: {e}");
-                    vec![]
-                }
-            };
+            let files = read_tar(tar)?;
 
             let total_size = files.iter().map(|f| f.size).sum();
 
@@ -422,6 +387,47 @@ fn read_file_statistic(path: PathBuf) -> Option<Statistic> {
                 files,
                 size: total_size,
             })
+        }
+        Err(e) => {
+            println!("Error: {e}");
+            None
+        }
+    }
+}
+
+fn read_tar<R: Read>(tar: R) -> Option<Vec<FileStat>> {
+    match Archive::new(tar).entries() {
+        Ok(files) => {
+            let result = files
+                .filter_map(|e| match e {
+                    Ok(entry) => Some(entry),
+                    Err(e) => {
+                        println!("  Error: {e}");
+                        None
+                    }
+                })
+                .filter_map(|e| {
+                    let file_size = e.header().size().unwrap_or_default();
+                    match e.path() {
+                        Ok(p) => {
+                            let extension = p
+                                .extension()
+                                .unwrap_or_default()
+                                .to_string_lossy()
+                                .to_string();
+                            Some(FileStat {
+                                extension,
+                                size: file_size,
+                            })
+                        }
+                        Err(e) => {
+                            println!("  Error: {e}");
+                            None
+                        }
+                    }
+                })
+                .collect_vec();
+            Some(result)
         }
         Err(e) => {
             println!("Error: {e}");
