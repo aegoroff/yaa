@@ -235,8 +235,8 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::i
 
     extensions
         .iter()
-        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
         .filter(|(e, _c)| e.len() <= max_ext_len)
+        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
         .enumerate()
         .take_while(|(num, (_, _))| {
             show_top_extensions.is_none() || *show_top_extensions.unwrap() > *num
