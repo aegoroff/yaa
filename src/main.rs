@@ -444,7 +444,7 @@ fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::
         .filter_map(|file| {
             let full_path = file.path();
             let meta = std::fs::metadata(full_path).ok()?;
-            if file.path().as_path().extension().unwrap() == extension {
+            if file.path().as_path().extension()? == extension {
                 Some(FileInfo {
                     path: file.path(),
                     size: meta.len(),
