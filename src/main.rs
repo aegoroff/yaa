@@ -228,7 +228,7 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::i
     let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
     let show_top_extensions = cmd.get_one::<usize>("top");
 
-    let extensions = group_by(stat, |s| s.extension.clone());
+    let extensions = group_by(&stat, |s| s.extension.clone());
 
     let mut resulter = Resulter::new(output_as_html);
     resulter.titles(row![bF=> "#", "Extension", "Count"]);
@@ -253,7 +253,7 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std:
     let stat = collect_statistic(root)?;
     let show_top_extensions = cmd.get_one::<usize>("top");
 
-    let extensions = group_by(stat, |s| {
+    let extensions = group_by(&stat, |s| {
         if TECHOLOGIES_MAP.contains_key(s.extension.as_str()) {
             (*TECHOLOGIES_MAP.get(s.extension.as_str()).unwrap()).to_string()
         } else {
@@ -280,7 +280,7 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std:
     Ok(())
 }
 
-fn group_by<F>(stat: Vec<Statistic>, group_fn: F) -> HashMap<String, u64>
+fn group_by<F>(stat: &[Statistic], group_fn: F) -> HashMap<String, u64>
 where
     F: FnMut(&&FileStat) -> String,
 {

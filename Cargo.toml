@@ -14,10 +14,10 @@ tar = "0.4.38"
 bzip2 = "0.4.4"
 num-format = "0.4"
 indicatif = "0.17.5"
-itertools = "0.10"
+itertools = "0.11"
 prettytable-rs = "0.10.0"
 lazy_static = "1.4.0"
-clap = { version = "4.3.3", features = ["std", "color", "suggestions", "cargo", "derive"] }
+clap = { version = "4.3.5", features = ["std", "color", "suggestions", "cargo", "derive"] }
 
 [profile.release]
 codegen-units = 1
