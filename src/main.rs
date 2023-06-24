@@ -272,8 +272,12 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std:
         .filter(|s| !s.0.is_empty())
         .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
         .enumerate()
-        .take_while(|(num, (_, _))| {
-            show_top_extensions.is_none() || *show_top_extensions.unwrap() > *num
+        .take_while(|(count, (_, _))| {
+            if let Some(limit) = show_top_extensions {
+                *limit > *count
+            } else {
+                true
+            }
         })
         .for_each(|(num, (ext, count))| {
             resulter.append_count_row(ext, num + 1, *count);
