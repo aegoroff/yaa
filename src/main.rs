@@ -31,161 +31,157 @@ pub struct FileStat {
 }
 
 const PATH: &str = "PATH";
+const OTHER_CAT: &str = "";
+const SHELL_CAT: &str = "Shell";
+const JAVA_CAT: &str = "Java";
+const PYTHON_CAT: &str = "Python";
+const IMAGE_CAT: &str = "Image";
+const WEB_CAT: &str = "Web/Frontend";
+const CONFIG_CAT: &str = "Config/Data";
+const ARCHIEVE_CAT: &str = "Archive";
+const CPP_CAT: &str = "C/C++";
+const GO_CAT: &str = "Go";
+const DB_CAT: &str = "Database";
+const DOC_CAT: &str = "Documentation";
+const SWIFT_CAT: &str = "Swift";
+const PHP_CAT: &str = "PHP";
+const DOTNET_CAT: &str = ".NET";
+const CERTIFICATE_CAT: &str = "Certificate";
+const PERL_CAT: &str = "Perl";
+const MULTIMEDIA_CAT: &str = "Multimedia";
+const TPL_CAT: &str = "Template";
+const RUST_CAT: &str = "Rust";
+const RUBY_CAT: &str = "Ruby";
+const LUA_CAT: &str = "Lua";
+const ASSEMBLER_CAT: &str = "Assembler";
+const FONTS_CAT: &str = "Fonts";
 
-lazy_static::lazy_static! {
-    static ref OTHER_CAT: String = String::new();
-    static ref SHELL_CAT: String = "Shell".to_owned();
-    static ref JAVA_CAT: String = "Java".to_owned();
-    static ref PYTHON_CAT: String = "Python".to_owned();
-    static ref IMAGE_CAT: String = "Image".to_owned();
-    static ref WEB_CAT: String = "Web/Frontend".to_owned();
-    static ref CONFIG_CAT: String = "Config/Data".to_owned();
-    static ref ARCHIEVE_CAT: String = "Archive".to_owned();
-    static ref CPP_CAT: String = "C/C++".to_owned();
-    static ref GO_CAT: String = "Go".to_owned();
-    static ref DB_CAT: String = "Database".to_owned();
-    static ref DOC_CAT: String = "Documentation".to_owned();
-    static ref SWIFT_CAT: String = "Swift".to_owned();
-    static ref PHP_CAT: String = "PHP".to_owned();
-    static ref DOTNET_CAT: String = ".NET".to_owned();
-    static ref CERTIFICATE_CAT: String = "Certificate".to_owned();
-    static ref PERL_CAT: String = "Perl".to_owned();
-    static ref MULTIMEDIA_CAT: String = "Multimedia".to_owned();
-    static ref TPL_CAT: String = "Template".to_owned();
-    static ref RUST_CAT: String = "Rust".to_owned();
-    static ref RUBY_CAT: String = "Ruby".to_owned();
-    static ref LUA_CAT: String = "Lua".to_owned();
-    static ref ASSEMBLER_CAT: String = "Assembler".to_owned();
-    static ref FONTS_CAT: String = "Fonts".to_owned();
-    static ref TECHOLOGIES: Vec<(&'static str, &'static String)> = vec![
-        ("java", &JAVA_CAT),
-        ("py", &PYTHON_CAT),
-        ("pyx", &PYTHON_CAT),
-        ("png", &IMAGE_CAT),
-        ("js", &WEB_CAT),
-        ("ts", &WEB_CAT),
-        ("json", &CONFIG_CAT),
-        ("gz", &ARCHIEVE_CAT),
-        ("yaml", &CONFIG_CAT),
-        ("cpp", &CPP_CAT),
-        ("h", &CPP_CAT),
-        ("tsx", &WEB_CAT),
-        ("make", &CONFIG_CAT),
-        ("yml", &CONFIG_CAT),
-        ("kt", &JAVA_CAT),
-        ("go", &GO_CAT),
-        ("sql", &DB_CAT),
-        ("db", &DB_CAT),
-        ("xml", &CONFIG_CAT),
-        ("md", &DOC_CAT),
-        ("markdown", &DOC_CAT),
-        ("css", &WEB_CAT),
-        ("scala", &JAVA_CAT),
-        ("svg", &IMAGE_CAT),
-        ("hpp", &CPP_CAT),
-        ("swift", &SWIFT_CAT),
-        ("txt", &DOC_CAT),
-        ("conf", &CONFIG_CAT),
-        ("jpg", &IMAGE_CAT),
-        ("c", &CPP_CAT),
-        ("cxx", &CPP_CAT),
-        ("sh", &SHELL_CAT),
-        ("html", &WEB_CAT),
-        ("htm", &WEB_CAT),
-        ("scss", &WEB_CAT),
-        ("proto", &CONFIG_CAT),
-        ("styl", &WEB_CAT),
-        ("csv", &CONFIG_CAT),
-        ("ext", &OTHER_CAT),
-        ("m", &CONFIG_CAT),
-        ("imageset", &IMAGE_CAT),
-        ("info", &OTHER_CAT),
-        ("php", &PHP_CAT),
-        ("gif", &IMAGE_CAT),
-        ("sls", &DOC_CAT),
-        ("ogg", &IMAGE_CAT),
-        ("cs", &DOTNET_CAT),
-        ("cshtml", &DOTNET_CAT),
-        ("ipynb", &PYTHON_CAT),
-        ("pm", &OTHER_CAT),
-        ("properties", &CONFIG_CAT),
-        ("webp", &IMAGE_CAT),
-        ("d", &OTHER_CAT),
-        ("pdf", &DOC_CAT),
-        ("resx", &CONFIG_CAT),
-        ("yql", &DB_CAT),
-        ("cc", &CPP_CAT),
-        ("net", &CONFIG_CAT),
-        ("i18n", &CONFIG_CAT),
-        ("zip", &ARCHIEVE_CAT),
-        ("jsx", &JAVA_CAT),
-        ("symlink", &SHELL_CAT),
-        ("pem", &CERTIFICATE_CAT),
-        ("j2", &TPL_CAT),
-        ("pl", &PERL_CAT),
-        ("xsl", &CONFIG_CAT),
-        ("snap", &CONFIG_CAT),
-        ("t", &CONFIG_CAT),
-        ("sqlt", &DB_CAT),
-        ("tsv", &CONFIG_CAT),
-        ("less", &WEB_CAT),
-        ("tgz", &ARCHIEVE_CAT),
-        ("mp3", &MULTIMEDIA_CAT),
-        ("mp4", &MULTIMEDIA_CAT),
-        ("sass", &WEB_CAT),
-        ("psql", &DB_CAT),
-        ("jpeg", &IMAGE_CAT),
-        ("wav", &MULTIMEDIA_CAT),
-        ("mustache", &TPL_CAT),
-        ("jinja2", &TPL_CAT),
-        ("kts", &JAVA_CAT),
-        ("cmake", &CONFIG_CAT),
-        ("dart", &WEB_CAT),
-        ("template", &TPL_CAT),
-        ("tmpl", &TPL_CAT),
-        ("tmpl-specs", &TPL_CAT),
-        ("lproj", &CONFIG_CAT),
-        ("wiki", &DOC_CAT),
-        ("vcxproj", &CONFIG_CAT),
-        ("bazel", &CONFIG_CAT),
-        ("toml", &CONFIG_CAT),
-        ("jar", &JAVA_CAT),
-        ("bash", &SHELL_CAT),
-        ("m4", &TPL_CAT),
-        ("vcproj", &CONFIG_CAT),
-        ("gzt", &ARCHIEVE_CAT),
-        ("csproj", &CONFIG_CAT),
-        ("ps1", &SHELL_CAT),
-        ("hcl", &CONFIG_CAT),
-        ("tf", &CONFIG_CAT),
-        ("sqlt", &DB_CAT),
-        ("tpl", &TPL_CAT),
-        ("rs", &RUST_CAT),
-        ("rb", &RUBY_CAT),
-        ("lua", &LUA_CAT),
-        ("gpg", &CERTIFICATE_CAT),
-        ("pub", &CERTIFICATE_CAT),
-        ("s", &ASSEMBLER_CAT),
-        ("asm", &ASSEMBLER_CAT),
-        ("ico", &IMAGE_CAT),
-        ("xlsx", &CONFIG_CAT),
-        ("groovy", &JAVA_CAT),
-        ("ini", &CONFIG_CAT),
-        ("sqlite3", &DB_CAT),
-        ("mysql", &DB_CAT),
-        ("chsql", &DB_CAT),
-        ("dbf", &DB_CAT),
-        ("il", &DOTNET_CAT),
-        ("7z", &ARCHIEVE_CAT),
-        ("bz2", &ARCHIEVE_CAT),
-        ("m4a", &MULTIMEDIA_CAT),
-        ("woff", &FONTS_CAT),
-        ("woff2", &FONTS_CAT),
-        ("ttf", &FONTS_CAT),
-        ("tt2", &FONTS_CAT),
-    ];
-    static ref TECHOLOGIES_MAP: HashMap<&'static str, &'static String> = TECHOLOGIES.iter().map(|(k, v)| (*k, *v)).collect();
-}
+static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
+    "java" => JAVA_CAT,
+    "py" => PYTHON_CAT,
+    "pyx" => PYTHON_CAT,
+    "png" => IMAGE_CAT,
+    "js" => WEB_CAT,
+    "ts" => WEB_CAT,
+    "json" => CONFIG_CAT,
+    "gz" => ARCHIEVE_CAT,
+    "yaml" => CONFIG_CAT,
+    "cpp" => CPP_CAT,
+    "h" => CPP_CAT,
+    "tsx" => WEB_CAT,
+    "make" => CONFIG_CAT,
+    "yml" => CONFIG_CAT,
+    "kt" => JAVA_CAT,
+    "go" => GO_CAT,
+    "sql" => DB_CAT,
+    "db" => DB_CAT,
+    "xml" => CONFIG_CAT,
+    "md" => DOC_CAT,
+    "markdown" => DOC_CAT,
+    "css" => WEB_CAT,
+    "scala" => JAVA_CAT,
+    "svg" => IMAGE_CAT,
+    "hpp" => CPP_CAT,
+    "swift" => SWIFT_CAT,
+    "txt" => DOC_CAT,
+    "conf" => CONFIG_CAT,
+    "jpg" => IMAGE_CAT,
+    "c" => CPP_CAT,
+    "cxx" => CPP_CAT,
+    "sh" => SHELL_CAT,
+    "html" => WEB_CAT,
+    "htm" => WEB_CAT,
+    "scss" => WEB_CAT,
+    "proto" => CONFIG_CAT,
+    "styl" => WEB_CAT,
+    "csv" => CONFIG_CAT,
+    "ext" => OTHER_CAT,
+    "m" => CONFIG_CAT,
+    "imageset" => IMAGE_CAT,
+    "info" => OTHER_CAT,
+    "php" => PHP_CAT,
+    "gif" => IMAGE_CAT,
+    "sls" => DOC_CAT,
+    "ogg" => IMAGE_CAT,
+    "cs" => DOTNET_CAT,
+    "cshtml" => DOTNET_CAT,
+    "ipynb" => PYTHON_CAT,
+    "pm" => OTHER_CAT,
+    "properties" => CONFIG_CAT,
+    "webp" => IMAGE_CAT,
+    "d" => OTHER_CAT,
+    "pdf" => DOC_CAT,
+    "resx" => CONFIG_CAT,
+    "yql" => DB_CAT,
+    "cc" => CPP_CAT,
+    "net" => CONFIG_CAT,
+    "i18n" => CONFIG_CAT,
+    "zip" => ARCHIEVE_CAT,
+    "jsx" => JAVA_CAT,
+    "symlink" => SHELL_CAT,
+    "pem" => CERTIFICATE_CAT,
+    "j2" => TPL_CAT,
+    "pl" => PERL_CAT,
+    "xsl" => CONFIG_CAT,
+    "snap" => CONFIG_CAT,
+    "t" => CONFIG_CAT,
+    "sqlt" => DB_CAT,
+    "tsv" => CONFIG_CAT,
+    "less" => WEB_CAT,
+    "tgz" => ARCHIEVE_CAT,
+    "mp3" => MULTIMEDIA_CAT,
+    "mp4" => MULTIMEDIA_CAT,
+    "sass" => WEB_CAT,
+    "psql" => DB_CAT,
+    "jpeg" => IMAGE_CAT,
+    "wav" => MULTIMEDIA_CAT,
+    "mustache" => TPL_CAT,
+    "jinja2" => TPL_CAT,
+    "kts" => JAVA_CAT,
+    "cmake" => CONFIG_CAT,
+    "dart" => WEB_CAT,
+    "template" => TPL_CAT,
+    "tmpl" => TPL_CAT,
+    "tmpl-specs" => TPL_CAT,
+    "lproj" => CONFIG_CAT,
+    "wiki" => DOC_CAT,
+    "vcxproj" => CONFIG_CAT,
+    "bazel" => CONFIG_CAT,
+    "toml" => CONFIG_CAT,
+    "jar" => JAVA_CAT,
+    "bash" => SHELL_CAT,
+    "m4" => TPL_CAT,
+    "vcproj" => CONFIG_CAT,
+    "gzt" => ARCHIEVE_CAT,
+    "csproj" => CONFIG_CAT,
+    "ps1" => SHELL_CAT,
+    "hcl" => CONFIG_CAT,
+    "tf" => CONFIG_CAT,
+    "tpl" => TPL_CAT,
+    "rs" => RUST_CAT,
+    "rb" => RUBY_CAT,
+    "lua" => LUA_CAT,
+    "gpg" => CERTIFICATE_CAT,
+    "pub" => CERTIFICATE_CAT,
+    "s" => ASSEMBLER_CAT,
+    "asm" => ASSEMBLER_CAT,
+    "ico" => IMAGE_CAT,
+    "xlsx" => CONFIG_CAT,
+    "groovy" => JAVA_CAT,
+    "ini" => CONFIG_CAT,
+    "sqlite3" => DB_CAT,
+    "mysql" => DB_CAT,
+    "chsql" => DB_CAT,
+    "dbf" => DB_CAT,
+    "il" => DOTNET_CAT,
+    "7z" => ARCHIEVE_CAT,
+    "bz2" => ARCHIEVE_CAT,
+    "m4a" => MULTIMEDIA_CAT,
+    "woff" => FONTS_CAT,
+    "woff2" => FONTS_CAT,
+    "ttf" => FONTS_CAT,
+    "tt2" => FONTS_CAT,
+};
 
 fn main() -> std::io::Result<()> {
     let app = build_cli();
@@ -260,7 +256,7 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std:
         if let Some(t) = TECHOLOGIES_MAP.get(s.extension.as_str()) {
             *t
         } else {
-            &OTHER_CAT
+            OTHER_CAT
         }
     });
 
@@ -287,9 +283,9 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std:
     Ok(())
 }
 
-fn group_by<'a, F>(stat: &'a [Statistic], group_fn: F) -> HashMap<&'a String, u64>
+fn group_by<'a, F>(stat: &'a [Statistic], group_fn: F) -> HashMap<&'a str, u64>
 where
-    F: FnMut(&&'a FileStat) -> &'a String,
+    F: FnMut(&&'a FileStat) -> &'a str,
 {
     stat.iter()
         .flat_map(|s| s.files.iter())
