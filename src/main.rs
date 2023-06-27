@@ -343,7 +343,7 @@ fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
         .filter_map(|arj| {
             let archive = File::open(arj.path.as_path()).ok()?;
             let mut bz2 = MultiBzDecoder::new(archive);
-            let f = arj.path.file_stem().unwrap().to_str().unwrap();
+            let f = arj.path.file_stem()?.to_str()?;
             let p = PathBuf::from(root);
             let tar = p.join(f);
 
