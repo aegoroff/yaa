@@ -443,13 +443,16 @@ fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::
     let dir = std::fs::read_dir(root)?;
     let files = dir
         .filter_map(std::result::Result::ok)
-        .filter(|d| d.file_type().is_ok() && d.file_type().unwrap().is_file())
-        .filter_map(|file| {
-            let full_path = file.path();
+        .filter_map(|entry| {
+            if !entry.file_type().ok()?.is_file() {
+                return None;
+            }
+
+            let full_path = entry.path();
             let meta = std::fs::metadata(full_path).ok()?;
-            if file.path().as_path().extension()? == extension {
+            if entry.path().as_path().extension()? == extension {
                 Some(FileInfo {
-                    path: file.path(),
+                    path: entry.path(),
                     size: meta.len(),
                 })
             } else {
