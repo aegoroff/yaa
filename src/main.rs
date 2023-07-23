@@ -7,6 +7,7 @@ use prettytable::row;
 use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
 use bzip2::read::MultiBzDecoder;
+use color_eyre::eyre::{Context, Result};
 use indicatif::HumanBytes;
 use itertools::Itertools;
 use progress::Progresser;
@@ -183,7 +184,8 @@ static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
     "tt2" => FONTS_CAT,
 };
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     let app = build_cli();
     let matches = app.get_matches();
 
@@ -198,7 +200,7 @@ fn main() -> std::io::Result<()> {
     }
 }
 
-fn default_action(root: &str, output_as_html: bool) -> std::io::Result<()> {
+fn default_action(root: &str, output_as_html: bool) -> Result<()> {
     let stat = collect_statistic(root)?;
 
     let total_files: usize = stat.iter().map(|s| s.files.len()).sum();
@@ -218,7 +220,7 @@ fn default_action(root: &str, output_as_html: bool) -> std::io::Result<()> {
     Ok(())
 }
 
-fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::io::Result<()> {
+fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
     let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
     let show_top_extensions = cmd.get_one::<usize>("top");
@@ -248,7 +250,7 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::i
     Ok(())
 }
 
-fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::io::Result<()> {
+fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
     let show_top_extensions = cmd.get_one::<usize>("top");
 
@@ -293,7 +295,7 @@ where
         .fold(0, |acc: u64, _key, _val| acc + 1)
 }
 
-fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::io::Result<()> {
+fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
 
     let ext_to_find = cmd.get_one::<String>("STRING").unwrap();
@@ -328,7 +330,7 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> std::
     Ok(())
 }
 
-fn collect_statistic(root: &str) -> std::io::Result<Vec<Statistic>> {
+fn collect_statistic(root: &str) -> Result<Vec<Statistic>> {
     let archives = collect_files(root, "bz2")?;
 
     let compressed_size = archives.iter().map(|f| f.size).sum();
@@ -439,8 +441,9 @@ fn read_tar<R: Read>(tar: R) -> Option<Vec<FileStat>> {
     }
 }
 
-fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>, std::io::Error> {
-    let dir = std::fs::read_dir(root)?;
+fn collect_files(root: &str, extension: &str) -> Result<Vec<FileInfo>> {
+    let dir =
+        std::fs::read_dir(root).wrap_err_with(|| format!("Failed to read directory: {root}"))?;
     let files = dir
         .filter_map(std::result::Result::ok)
         .filter_map(|entry| {
