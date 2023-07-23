@@ -267,8 +267,8 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resu
 
     extensions
         .iter()
-        .filter(|s| !s.0.is_empty())
-        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
+        .filter(|(ext, _)| !ext.is_empty())
+        .sorted_by(|(_, ext_a), (_, ext_b)| Ord::cmp(*ext_b, *ext_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
             if let Some(limit) = show_top_extensions {
