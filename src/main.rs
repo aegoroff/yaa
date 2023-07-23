@@ -233,7 +233,7 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result
     extensions
         .iter()
         .filter(|(e, _c)| e.len() <= max_ext_len)
-        .sorted_by(|a, b| Ord::cmp(&b.1, &a.1))
+        .sorted_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
             if let Some(limit) = show_top_extensions {
@@ -268,7 +268,7 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resu
     extensions
         .iter()
         .filter(|(ext, _)| !ext.is_empty())
-        .sorted_by(|(_, ext_a), (_, ext_b)| Ord::cmp(*ext_b, *ext_a))
+        .sorted_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
             if let Some(limit) = show_top_extensions {
