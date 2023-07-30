@@ -17,7 +17,7 @@ indicatif = "0.17.5"
 itertools = "0.11"
 prettytable-rs = "0.10.0"
 clap = { version = "4.3.19", features = ["std", "color", "suggestions", "cargo", "derive"] }
-phf = { version = "0.11.1", features = ["macros"] }
+phf = { version = "0.11.2", features = ["macros"] }
 color-eyre = "0.6.2"
 
 [profile.release]
