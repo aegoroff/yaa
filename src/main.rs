@@ -212,7 +212,7 @@ fn default_action(root: &str, output_as_html: bool) -> Result<()> {
     let mut resulter = Resulter::new(output_as_html);
     resulter.titles(row![bF=> "Archive", "Files", "Size"]);
     stat.iter()
-        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
+        .sorted_unstable_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
             resulter.append(item);
         });
@@ -235,7 +235,7 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result
     extensions
         .iter()
         .filter(|(e, _c)| e.len() <= max_ext_len)
-        .sorted_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
+        .sorted_unstable_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
             if let Some(limit) = show_top_extensions {
@@ -270,7 +270,7 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resu
     extensions
         .iter()
         .filter(|(ext, _)| !ext.is_empty())
-        .sorted_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
+        .sorted_unstable_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
             if let Some(limit) = show_top_extensions {
@@ -314,7 +314,7 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resul
     let mut total_count = 0u64;
     tars_with_ext
         .iter()
-        .sorted_by(|a, b| Ord::cmp(&a.title, &b.title))
+        .sorted_unstable_by(|a, b| Ord::cmp(&a.title, &b.title))
         .enumerate()
         .for_each(|(num, stat)| {
             let count = stat
@@ -343,7 +343,7 @@ fn collect_statistic(root: &str) -> Result<Vec<Statistic>> {
     progress.progress(0);
     let stat: Vec<Statistic> = archives
         .iter()
-        .sorted_by(|a, b| Ord::cmp(&b.size, &a.size))
+        .sorted_unstable_by(|a, b| Ord::cmp(&b.size, &a.size))
         .filter_map(|arj| {
             let archive = File::open(arj.path.as_path()).ok()?;
             let mut bz2 = MultiBzDecoder::new(archive);
