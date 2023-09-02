@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use indicatif::{ProgressBar, ProgressStyle};
 
 extern crate indicatif;
@@ -18,15 +19,16 @@ pub struct Progresser {
 }
 
 impl Progresser {
-    #[must_use]
-    pub fn new(total: u64) -> Self {
+    /// # Errors
+    ///
+    /// Will return Err in case of bad template
+    pub fn new(total: u64) -> Result<Self> {
         let bar = ProgressBar::new(total);
         bar.set_style(ProgressStyle::default_bar()
-            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})\n{wide_msg}")
-            .expect("Progress template not parsed")
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})\n{wide_msg}")?
             .progress_chars("#>-"));
 
-        Self { bar, items: 0 }
+        Ok(Self { bar, items: 0 })
     }
 }
 

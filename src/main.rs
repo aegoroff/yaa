@@ -67,6 +67,7 @@ static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
     "js" => WEB_CAT,
     "ts" => WEB_CAT,
     "json" => CONFIG_CAT,
+    "jsons" => CONFIG_CAT,
     "gz" => ARCHIEVE_CAT,
     "yaml" => CONFIG_CAT,
     "cpp" => CPP_CAT,
@@ -339,7 +340,7 @@ fn collect_statistic(root: &str) -> Result<Vec<Statistic>> {
 
     let mut unpacked_progress = 0u64;
 
-    let mut progress = Progresser::new(compressed_size);
+    let mut progress = Progresser::new(compressed_size)?;
     progress.progress(0);
     let stat: Vec<Statistic> = archives
         .iter()
