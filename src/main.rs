@@ -344,7 +344,7 @@ fn collect_statistic(root: &str) -> Result<Vec<Statistic>> {
     progress.progress(0);
     let stat: Vec<Statistic> = archives
         .iter()
-        .sorted_unstable_by(|a, b| Ord::cmp(&b.size, &a.size))
+        .sorted_unstable_by(|a, b| Ord::cmp(&b.size, &a.size)) // by size descended
         .filter_map(|arj| {
             let archive = File::open(arj.path.as_path()).ok()?;
             let mut bz2 = MultiBzDecoder::new(archive);
