@@ -3,8 +3,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{command, ArgAction, ArgMatches, Command};
-use prettytable::row;
+use clap::{command, ArgMatches, Command};
 
 use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
@@ -193,25 +192,24 @@ fn main() -> Result<()> {
     let matches = app.get_matches();
 
     let root = matches.get_one::<String>(PATH).unwrap();
-    let output_as_html = matches.get_flag("html");
 
     match matches.subcommand() {
-        Some(("e", cmd)) => show_extensions(root, output_as_html, cmd),
-        Some(("s", cmd)) => search_extension(root, output_as_html, cmd),
-        Some(("t", cmd)) => show_technologies(root, output_as_html, cmd),
-        _ => default_action(root, output_as_html),
+        Some(("e", cmd)) => show_extensions(root, cmd),
+        Some(("s", cmd)) => search_extension(root, cmd),
+        Some(("t", cmd)) => show_technologies(root, cmd),
+        _ => default_action(root),
     }
 }
 
-fn default_action(root: &str, output_as_html: bool) -> Result<()> {
+fn default_action(root: &str) -> Result<()> {
     let stat = collect_statistic(root)?;
 
     let total_files: usize = stat.iter().map(|s| s.files.len()).sum();
 
     let total_size = stat.iter().map(|s| s.size).sum();
 
-    let mut resulter = Resulter::new(output_as_html);
-    resulter.titles(row![bF=> "Archive", "Files", "Size"]);
+    let mut resulter = Resulter::new();
+    resulter.titles(&["Archive", "Files", "Size"]);
     stat.iter()
         .sorted_unstable_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
@@ -223,15 +221,15 @@ fn default_action(root: &str, output_as_html: bool) -> Result<()> {
     Ok(())
 }
 
-fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
+fn show_extensions(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
     let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
     let show_top_extensions = cmd.get_one::<usize>("top");
 
     let extensions = group_by(&stat, |s| &s.extension);
 
-    let mut resulter = Resulter::new(output_as_html);
-    resulter.titles(row![bF=> "#", "Extension", "Count"]);
+    let mut resulter = Resulter::new();
+    resulter.titles(&["#", "Extension", "Count"]);
 
     extensions
         .iter()
@@ -253,7 +251,7 @@ fn show_extensions(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result
     Ok(())
 }
 
-fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
+fn show_technologies(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
     let show_top_extensions = cmd.get_one::<usize>("top");
 
@@ -265,8 +263,8 @@ fn show_technologies(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resu
         }
     });
 
-    let mut resulter = Resulter::new(output_as_html);
-    resulter.titles(row![bF=> "#", "Technology/Language", "Count"]);
+    let mut resulter = Resulter::new();
+    resulter.titles(&["#", "Technology/Language", "Count"]);
 
     extensions
         .iter()
@@ -298,7 +296,7 @@ where
         .fold(0, |acc: u64, _key, _val| acc + 1)
 }
 
-fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Result<()> {
+fn search_extension(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
 
     let ext_to_find = cmd.get_one::<String>("STRING").unwrap();
@@ -308,9 +306,9 @@ fn search_extension(root: &str, output_as_html: bool, cmd: &ArgMatches) -> Resul
         .filter(|s| s.files.iter().any(|x| x.extension == ext_to_find.as_str()))
         .collect_vec();
 
-    let mut resulter = Resulter::new(output_as_html);
+    let mut resulter = Resulter::new();
     let title = format!("Archive with '{ext_to_find}' extension");
-    resulter.titles(row![bF=> "#", title, "Count"]);
+    resulter.titles(&["#", &title, "Count"]);
 
     let mut total_count = 0u64;
     tars_with_ext
@@ -480,12 +478,6 @@ fn build_cli() -> Command {
                 .help("Sets Yandex archives path")
                 .required(true)
                 .index(1),
-        )
-        .arg(
-            arg!(--html)
-                .required(false)
-                .action(ArgAction::SetTrue)
-                .help("Output in HTML format"),
         )
         .subcommand(
             Command::new("e")

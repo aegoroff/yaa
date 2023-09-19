@@ -1,12 +1,12 @@
+use comfy_table::{presets, Attribute, Cell, ContentArrangement, Table, TableComponent};
 use indicatif::HumanBytes;
+use itertools::Itertools;
 use num_format::{Locale, ToFormattedString};
-use prettytable::{format, row, Row, Table};
 
 use crate::FileStat;
 
 pub struct Resulter {
     table: Table,
-    output_as_html: bool,
 }
 
 pub struct Statistic {
@@ -15,31 +15,43 @@ pub struct Statistic {
     pub size: u64,
 }
 
+impl Default for Resulter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Resulter {
     #[must_use]
-    pub fn new(output_as_html: bool) -> Self {
+    pub fn new() -> Self {
         let mut table = Table::new();
-
-        let format = format::FormatBuilder::new()
-            .column_separator(' ')
-            .borders(' ')
-            .separators(
-                &[format::LinePosition::Title],
-                format::LineSeparator::new('-', ' ', ' ', ' '),
-            )
-            .indent(0)
-            .padding(0, 0)
-            .build();
-        table.set_format(format);
-
-        Self {
-            table,
-            output_as_html,
-        }
+        table
+            .load_preset(presets::UTF8_FULL_CONDENSED)
+            .set_style(TableComponent::BottomBorder, ' ')
+            .set_style(TableComponent::BottomBorderIntersections, ' ')
+            .set_style(TableComponent::TopBorder, ' ')
+            .set_style(TableComponent::TopBorderIntersections, ' ')
+            .set_style(TableComponent::HeaderLines, '-')
+            .set_style(TableComponent::RightHeaderIntersection, ' ')
+            .set_style(TableComponent::LeftHeaderIntersection, ' ')
+            .set_style(TableComponent::MiddleHeaderIntersections, ' ')
+            .set_style(TableComponent::LeftBorder, ' ')
+            .set_style(TableComponent::RightBorder, ' ')
+            .set_style(TableComponent::TopRightCorner, ' ')
+            .set_style(TableComponent::TopLeftCorner, ' ')
+            .set_style(TableComponent::BottomLeftCorner, ' ')
+            .set_style(TableComponent::BottomRightCorner, ' ')
+            .set_style(TableComponent::VerticalLines, ' ')
+            .set_content_arrangement(ContentArrangement::Dynamic);
+        Self { table }
     }
 
-    pub fn titles(&mut self, titles: Row) {
-        self.table.set_titles(titles);
+    pub fn titles(&mut self, titles: &[&str]) {
+        let heads = titles
+            .iter()
+            .map(|t| Cell::new(t).add_attribute(Attribute::Bold))
+            .collect_vec();
+        self.table.set_header(heads);
     }
 
     pub fn append(&mut self, res: &Statistic) {
@@ -49,7 +61,11 @@ impl Resulter {
     pub fn append_row(&mut self, name: &str, size: u64, count: u64) {
         let files = count.to_formatted_string(&Locale::ru);
         let size = HumanBytes(size).to_string();
-        self.table.add_row(row![bF->name, files, size]);
+        self.table.add_row(vec![
+            Cell::new(name).add_attribute(Attribute::Bold),
+            Cell::new(files),
+            Cell::new(size),
+        ]);
     }
 
     pub fn append_count_row(&mut self, name: &str, num: usize, count: u64) {
@@ -59,21 +75,20 @@ impl Resulter {
         } else {
             String::default()
         };
-        self.table.add_row(row![num, bF->name, ext_count]);
+        self.table.add_row(vec![
+            Cell::new(num),
+            Cell::new(name).add_attribute(Attribute::Bold),
+            Cell::new(ext_count),
+        ]);
     }
 
     pub fn append_empty_row(&mut self) {
-        self.table.add_empty_row();
+        self.table.add_row(vec!["", "", ""]);
     }
 
     pub fn print(&self) {
         println!();
         println!();
-        if self.output_as_html {
-            let mut w = std::io::stdout();
-            self.table.print_html(&mut w).unwrap_or_default();
-        } else {
-            self.table.printstd();
-        }
+        println!("{}", self.table);
     }
 }
