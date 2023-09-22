@@ -225,7 +225,9 @@ fn default_action(root: &str) -> Result<()> {
 
 fn show_extensions(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
-    let max_ext_len = *cmd.get_one::<usize>("length").unwrap();
+    let max_ext_len = *cmd
+        .get_one::<usize>("length")
+        .wrap_err_with(|| "Failed get length from command line parameter")?;
     let show_top_extensions = cmd.get_one::<usize>("top");
 
     let extensions = group_by(&stat, |s| &s.extension);
@@ -301,7 +303,9 @@ where
 fn search_extension(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
 
-    let ext_to_find = cmd.get_one::<String>("STRING").unwrap();
+    let ext_to_find = cmd
+        .get_one::<String>("STRING")
+        .wrap_err_with(|| "Failed get extension to search from command line parameter")?;
 
     let tars_with_ext = stat
         .iter()
