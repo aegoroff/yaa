@@ -8,7 +8,7 @@ use clap::{command, ArgMatches, Command};
 use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
 use bzip2::read::MultiBzDecoder;
-use color_eyre::eyre::{Context, Result};
+use color_eyre::eyre::{Context, ContextCompat, Result};
 use indicatif::HumanBytes;
 use itertools::Itertools;
 use progress::Progresser;
@@ -191,7 +191,9 @@ fn main() -> Result<()> {
     let app = build_cli();
     let matches = app.get_matches();
 
-    let root = matches.get_one::<String>(PATH).unwrap();
+    let root = matches
+        .get_one::<String>(PATH)
+        .wrap_err_with(|| "Failed get path to scan from command line parameter")?;
 
     match matches.subcommand() {
         Some(("e", cmd)) => show_extensions(root, cmd),

@@ -13,7 +13,7 @@ edition = "2021"
 tar = "0.4.40"
 bzip2 = "0.4.4"
 num-format = "0.4"
-indicatif = "0.17.6"
+indicatif = "0.17.7"
 itertools = "0.11"
 clap = { version = "4.4.4", features = ["std", "color", "suggestions", "cargo", "derive"] }
 phf = { version = "0.11.2", features = ["macros"] }
