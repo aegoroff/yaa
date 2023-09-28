@@ -1,6 +1,6 @@
 [![](https://tokei.rs/b1/github/aegoroff/yaa?category=code)](https://github.com/XAMPPRocky/tokei)
 
-# Tinkoff
+# Yaa
 
 Yandex archive analyzer tool
 
