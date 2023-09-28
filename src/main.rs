@@ -57,6 +57,7 @@ const RUBY_CAT: &str = "Ruby";
 const LUA_CAT: &str = "Lua";
 const ASSEMBLER_CAT: &str = "Assembler";
 const FONTS_CAT: &str = "Fonts";
+const BINARY_CAT: &str = "Binary artefacts";
 
 static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
     "java" => JAVA_CAT,
@@ -69,6 +70,7 @@ static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
     "jsons" => CONFIG_CAT,
     "gz" => ARCHIEVE_CAT,
     "yaml" => CONFIG_CAT,
+    "gradle" => CONFIG_CAT,
     "cpp" => CPP_CAT,
     "h" => CPP_CAT,
     "tsx" => WEB_CAT,
@@ -184,6 +186,8 @@ static TECHOLOGIES_MAP: phf::Map<&'static str, &'static str> = phf::phf_map! {
     "woff2" => FONTS_CAT,
     "ttf" => FONTS_CAT,
     "tt2" => FONTS_CAT,
+    "out" => BINARY_CAT,
+    "0" => BINARY_CAT,
 };
 
 fn main() -> Result<()> {
