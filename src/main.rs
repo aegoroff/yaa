@@ -228,36 +228,19 @@ fn show_extensions(root: &str, cmd: &ArgMatches) -> Result<()> {
     let max_ext_len = *cmd
         .get_one::<usize>("length")
         .wrap_err_with(|| "Failed get length from command line parameter")?;
-    let show_top_extensions = cmd.get_one::<usize>("top");
+    let limit = cmd.get_one::<usize>("top");
 
     let extensions = group_by(&stat, |s| &s.extension);
 
-    let mut resulter = Resulter::new();
-    resulter.titles(&["#", "Extension", "Count"]);
-
-    extensions
-        .iter()
-        .filter(|(e, _c)| e.len() <= max_ext_len)
-        .sorted_unstable_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
-        .enumerate()
-        .take_while(|(count, (_, _))| {
-            if let Some(limit) = show_top_extensions {
-                *limit > *count
-            } else {
-                true
-            }
-        })
-        .for_each(|(num, (ext, count))| {
-            resulter.append_count_row(ext, num + 1, *count);
-        });
-    resulter.print();
-
+    show_groupped(&extensions, limit, "Extension", |(e, _c)| {
+        e.len() <= max_ext_len
+    });
     Ok(())
 }
 
 fn show_technologies(root: &str, cmd: &ArgMatches) -> Result<()> {
     let stat = collect_statistic(root)?;
-    let show_top_extensions = cmd.get_one::<usize>("top");
+    let limit = cmd.get_one::<usize>("top");
 
     let extensions = group_by(&stat, |s| {
         if let Some(t) = TECHOLOGIES_MAP.get(s.extension.as_str()) {
@@ -266,17 +249,26 @@ fn show_technologies(root: &str, cmd: &ArgMatches) -> Result<()> {
             OTHER_CAT
         }
     });
+    show_groupped(&extensions, limit, "Technology/Language", |(ext, _)| {
+        !ext.is_empty()
+    });
+    Ok(())
+}
 
+fn show_groupped<P>(items: &HashMap<&str, u64>, limit: Option<&usize>, title: &str, filter: P)
+where
+    P: FnMut(&(&&str, &u64)) -> bool,
+{
     let mut resulter = Resulter::new();
-    resulter.titles(&["#", "Technology/Language", "Count"]);
+    resulter.titles(&["#", title, "Count"]);
 
-    extensions
+    items
         .iter()
-        .filter(|(ext, _)| !ext.is_empty())
+        .filter(filter)
         .sorted_unstable_by(|(_, count_a), (_, count_b)| Ord::cmp(*count_b, *count_a))
         .enumerate()
         .take_while(|(count, (_, _))| {
-            if let Some(limit) = show_top_extensions {
+            if let Some(limit) = limit {
                 *limit > *count
             } else {
                 true
@@ -286,8 +278,6 @@ fn show_technologies(root: &str, cmd: &ArgMatches) -> Result<()> {
             resulter.append_count_row(ext, num + 1, *count);
         });
     resulter.print();
-
-    Ok(())
 }
 
 fn group_by<'a, F>(stat: &'a [Statistic], group_fn: F) -> HashMap<&'a str, u64>
