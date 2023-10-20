@@ -46,6 +46,7 @@ impl Resulter {
         Self { table }
     }
 
+    /// Sets table's headline
     pub fn titles(&mut self, titles: &[&str]) {
         let heads = titles
             .iter()
@@ -54,6 +55,7 @@ impl Resulter {
         self.table.set_header(heads);
     }
 
+    /// Appends Statistic as table row
     pub fn append_stat_as_row(&mut self, res: &Statistic) {
         self.append_row(&res.title, res.size, res.files.len() as u64);
     }
