@@ -219,7 +219,7 @@ fn default_action(root: &str) -> Result<()> {
     stat.iter()
         .sorted_unstable_by(|a, b| Ord::cmp(&a.title, &b.title))
         .for_each(|item| {
-            resulter.append(item);
+            resulter.append_stat_as_row(item);
         });
     resulter.append_empty_row();
     resulter.append_row("Total", total_size, total_files as u64);

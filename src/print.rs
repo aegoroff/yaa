@@ -54,7 +54,7 @@ impl Resulter {
         self.table.set_header(heads);
     }
 
-    pub fn append(&mut self, res: &Statistic) {
+    pub fn append_stat_as_row(&mut self, res: &Statistic) {
         self.append_row(&res.title, res.size, res.files.len() as u64);
     }
 
