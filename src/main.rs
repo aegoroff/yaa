@@ -3,7 +3,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{command, ArgMatches, Command};
+use clap::{command, Arg, ArgMatches, Command};
 
 use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
@@ -490,12 +490,7 @@ fn build_cli() -> Command {
                         .default_value("10")
                         .help("The max length of file extension to output"),
                 )
-                .arg(
-                    arg!(-t --top <NUMBER>)
-                        .required(false)
-                        .value_parser(value_parser!(usize))
-                        .help("Output only specified number of extensions sorted by count"),
-                ),
+                .arg(top_arg()),
         )
         .subcommand(
             Command::new("s")
@@ -512,11 +507,13 @@ fn build_cli() -> Command {
             Command::new("t")
                 .aliases(["techologies"])
                 .about("Show technologies info")
-                .arg(
-                    arg!(-t --top <NUMBER>)
-                        .required(false)
-                        .value_parser(value_parser!(usize))
-                        .help("Output only specified number of technologies sorted by count"),
-                ),
+                .arg(top_arg()),
         )
+}
+
+fn top_arg() -> Arg {
+    arg!(-t --top <NUMBER>)
+        .required(false)
+        .value_parser(value_parser!(usize))
+        .help("Output only specified number of items (technologies or extensions) sorted by count")
 }
