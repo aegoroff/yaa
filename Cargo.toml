@@ -10,12 +10,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tar = "0.4.44"
+tar = "0.4.45"
 bzip2 = "0.6.1"
 num-format = "0.4"
-indicatif = "0.18.3"
+indicatif = "0.18.4"
 itertools = "0.14.0"
-clap = { version = "4.5.53", features = [
+clap = { version = "4.6.1", features = [
     "std",
     "color",
     "suggestions",
@@ -24,7 +24,7 @@ clap = { version = "4.5.53", features = [
 ] }
 phf = { version = "0.13.1", features = ["macros"] }
 color-eyre = "0.6.5"
-comfy-table = "7.2.1"
+comfy-table = "7.2.2"
 
 [profile.release]
 codegen-units = 1
