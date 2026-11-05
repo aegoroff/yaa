@@ -5,26 +5,26 @@ authors = ["egoroff <egoroff@gmail.com>"]
 version = "0.1.0"
 keywords = ["yandex", "tool", "sources", "analyze"]
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tar = "0.4.45"
+tar = "0.4.46"
 bzip2 = "0.6.1"
 num-format = "0.4"
-indicatif = "0.18.4"
-itertools = "0.14.0"
-clap = { version = "4.6.1", features = [
+indicatif = "0.18.6"
+itertools = "0.15.0"
+clap = { version = "4.6.7", features = [
     "std",
     "color",
     "suggestions",
     "cargo",
     "derive",
 ] }
-phf = { version = "0.13.1", features = ["macros"] }
+phf = { version = "0.14.0", features = ["macros"] }
 color-eyre = "0.6.5"
-comfy-table = "7.2.2"
+comfy-table = "8.0.1"
 
 [profile.release]
 codegen-units = 1
